@@ -41,7 +41,7 @@
 					<md-button class="md-raised" @click="start">start</md-button>
 					<md-button class="md-raised" @click="stop">stop</md-button>
 					<p>無線機の試験用に等ゲイン (RMS) の正弦波または疑似音声<!-- 、疑似信号 -->を発生させます。OS の設定や出力装置によって出力電圧は変わりますので、単位はありません。Gain は 1.0 に対する比で dB になっています</p>
-					<p>疑似音声は ITU-T G.227 の特性に従ってホワイトノイズをフィルタすることで発生させています (ただし FIR による近似)</p>
+					<p>疑似音声は ITU-T G.227 の特性に従ってホワイトノイズをフィルタすることで発生させています (デジタルフィルタ)</p>
 					<md-field>
 						<label>Gain</label>
 						<md-input type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue"></md-input>

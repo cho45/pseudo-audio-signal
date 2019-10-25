@@ -37,14 +37,16 @@ new Vue({
 				this.whitenoiseGain = this.audioContext.createGain();
 				this.whitenoiseGain.gain.value = 0;
 
-				const coeffs = await this.coeffsPromise;
+				const [iir1, coeffs] = await this.coeffsPromise;
+				console.log(iir1);
+
+				this.iirFilterNode1 = this.audioContext.createIIRFilter(iir1.num, iir1.den);
 
 				const firBuffer = this.audioContext.createBuffer(1, coeffs.length, this.audioContext.sampleRate);
 				const firData = firBuffer.getChannelData(0);
 				for (var i = 0, len = coeffs.length; i < len; i++) {
 					firData[i] = coeffs[i];
 				}
-				console.log(firData);
 
 				this.firFilterNode = this.audioContext.createConvolver();
 				this.firFilterNode.normalize = false;
@@ -57,6 +59,7 @@ new Vue({
 
 				[
 					this.noiseNode,
+					this.iirFilterNode1,
 					this.firFilterNode,
 					this.pseudoAudioGain,
 					this.outGain
@@ -161,7 +164,7 @@ new Vue({
 					this.oscillatorGain.gain.value = Math.sqrt(2);
 					break;
 				case "pseudoAudio":
-					this.pseudoAudioGain.gain.value = 4.74;
+					this.pseudoAudioGain.gain.value = 6.666;
 					console.log(this.pseudoAudioGain.gain.value);
 					break;
 				case "whitenoise":
