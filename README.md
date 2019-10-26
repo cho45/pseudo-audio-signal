@@ -11,7 +11,7 @@ WebAudio で音声を生成しています。白色雑音を生成するため�
 
 ## ITU-T G.227 のフィルタ設計
 
-ITU-T G.227 記載のアナログフィルタを双一次変換してFIRを補正しています。係数の算出は以下の通り Jupyter Notebook で行いました。
+ITU-T G.227 記載のアナログフィルタを双一次変換してデジタルIIRフィルタとし、さらにFIRを補正しています。係数の算出は以下の通り Jupyter Notebook で行いました。
 
 - https://nbviewer.jupyter.org/github/cho45/pseudo-audio-signal/blob/master/docs/03-iir-fir.ipynb
 
