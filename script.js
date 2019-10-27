@@ -125,15 +125,15 @@ new Vue({
 				const ctx = canvas.getContext('2d');
 				ctx.strokeStyle = "#000000";
 				ctx.fillStyle = "#000000";
+				const freqLog = new Float32Array(this.analyser.frequencyBinCount).map( (_, i) => Math.log( this.audioContext.sampleRate / this.analyser.fftSize * i) );
 				const draw = () => {
 					this.analyser.getFloatFrequencyData(data);
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 					ctx.beginPath();
 					for (var i = 0, len = this.analyser.frequencyBinCount; i < len; i++) {
-						const freq = Math.log(this.audioContext.sampleRate / this.analyser.fftSize * i);
-						const x = freq / freqMax * canvas.width;
-						var y = (data[i] - this.analyser.maxDecibels) / range;
+						const x = freqLog[i] / freqMax * canvas.width;
+						const y = (data[i] - this.analyser.maxDecibels) / range;
 						if (i === 0) {
 							ctx.moveTo(x, (canvas.height * y));
 						} else {
@@ -143,8 +143,7 @@ new Vue({
 					ctx.stroke();
 
 					this.analyser.getFloatTimeDomainData(data);
-
-					this.avg = data.reduce( (r, i) => r + Math.abs(i), 0) / data.length 
+					this.avg = data.reduce( (r, i) => r + Math.abs(i), 0) / data.length;
 					this.rms = Math.sqrt( data.reduce( (r, i) => r + (i * i), 0) / data.length );
 					this.peak = Math.max(...data);
 
