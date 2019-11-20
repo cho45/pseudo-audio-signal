@@ -159,7 +159,12 @@ new Vue({
 			this.pseudoAudioGain.gain.value = 0;
 			this.whitenoiseGain.gain.value = 0;
 			switch (this.waveType) {
-				case "sine1kHz":
+				case "sine1000Hz":
+					this.oscillatorNode.frequency.value = 1000;
+					this.oscillatorGain.gain.value = Math.sqrt(2);
+					break;
+				case "sine1500Hz":
+					this.oscillatorNode.frequency.value = 1500;
 					this.oscillatorGain.gain.value = Math.sqrt(2);
 					break;
 				case "pseudoAudio":
