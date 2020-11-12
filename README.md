@@ -7,7 +7,11 @@ ITU-T G.227 疑似音声信号発生器
 
 ## 仕組みや利用技術
 
-WebAudio で音声を生成しています。白色雑音を生成するために AudioWorkletNode を使っているため、2019-10-25 の時点では Google Chrome でのみ動作します。
+WebAudio で音声を生成しています。白色雑音を生成するために AudioWorkletNode を使っているため、サポートするブラウザが必要です。
+
+ * Google Chrome 67
+ * Mozilla Firefox 76
+ * Microsoft Edge 79
 
 ## ITU-T G.227 のフィルタ設計
 
