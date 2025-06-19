@@ -1,17 +1,19 @@
-
+import { createApp } from 'https://cdn.jsdelivr.net/npm/vue@3.5.17/dist/vue.esm-browser.js';
 import { NoiseNode } from "./noise-node.js";
 
-Vue.use(VueMaterial.default)
+const appOptions = {
+	tempalte: document.querySelector('#app').innerHTML,
 
-new Vue({
-	el: '#app',
-	data: {
-		gainValue: -20,
-		avg: 0.0,
-		rms: 0.0,
-		peak: 0.0,
-		waveType: "pseudoAudio",
-		offset10dB: false, // F3E, F1E, G1E のときは 正弦波に対して +10dB の音声入力が必要
+	data() {
+		return {
+			gainValue: -20,
+			avg: 0.0,
+			rms: 0.0,
+			peak: 0.0,
+			waveType: "pseudoAudio",
+			offset10dB: false, // F3E, F1E, G1E のときは 正弦波に対して +10dB の音声入力が必要
+			isStarted: false,
+		};
 	},
 
 	methods: {
@@ -182,6 +184,15 @@ new Vue({
 		stop: async function () {
 			this.outGain.gain.value = 0;
 		},
+
+		toggleStartStop: function () {
+			if (this.isStarted) {
+				this.stop();
+			} else {
+				this.start();
+			}
+			this.isStarted = !this.isStarted;
+		},
 	},
 
 	computed: {
@@ -190,7 +201,7 @@ new Vue({
 		}
 	},
 
-	mounted: async function () {
+	async mounted() {
 		this.coeffsPromise = (await fetch('./coeffs.json')).json();
 
 		this.$watch('gainValue', (n) => {
@@ -204,6 +215,8 @@ new Vue({
 		this.$watch('offset10dB', () => {
 			this.applySetting();
 		});
-	},
-})
+	}
+};
+
+createApp(appOptions).mount('#app');
 

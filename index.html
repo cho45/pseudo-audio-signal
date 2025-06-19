@@ -7,73 +7,235 @@
 		<title>試験用 疑似音声発生器</title>
 
 		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
-		<link rel="stylesheet" href="https://unpkg.com/vue-material@1.0.0-beta-15/dist/vue-material.min.css">
-		<link rel="stylesheet" href="https://unpkg.com/vue-material@1.0.0-beta-15/dist/theme/default.css">
-		<script src="https://unpkg.com/vue@2.6.14"></script>
-		<script src="https://unpkg.com/vue-material@1.0.0-beta-15/dist/vue-material.min.js"></script>
 
 		<link rev="made" href="mailto:cho45@lowreal.net"/>
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
 		<style>
-			#app {
-				max-width: 600px;
-				margin: auto;
-			}
-
-			#canvas {
-				position: relative;
-				width: 600px;
-				height: 512px;
-				margin: 0 -17px;
-			}
-
-			#canvas > canvas {
-				position: absolute;
-				width: 100%;
-				height: 100%;
-			}
+			html, body {
+                background: #f5f7fa;
+                font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+                color: #222;
+                margin: 0;
+                padding: 0;
+            }
+            #app {
+                max-width: 600px;
+                margin: 40px auto;
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+                padding: 32px 24px 24px 24px;
+            }
+            h1, h2, h3 {
+                font-weight: 500;
+                margin-top: 0;
+            }
+            .canvas {
+                position: relative;
+                width: 100%;
+                max-width: 600px;
+                height: 320px;
+                margin: 24px 0 0 0;
+                background: #e3eaf2;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                overflow: hidden;
+                max-width: 600px;
+            }
+            .canvas > canvas {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+            }
+            button {
+                background: #1976d2;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                padding: 0.5em 1.5em;
+                font-size: 1rem;
+                font-weight: 500;
+                margin: 0.2em 0.5em 0.2em 0;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            button:hover {
+                background: #1565c0;
+            }
+            input[type="number"], input[type="radio"], input[type="checkbox"] {
+                margin-right: 0.5em;
+                accent-color: #1976d2;
+            }
+            input[type="number"] {
+                border: 1px solid #b0bec5;
+                border-radius: 4px;
+                padding: 0.3em 0.7em;
+                font-size: 1rem;
+                width: 6em;
+                background: #f9fbfd;
+                transition: border 0.2s;
+            }
+            input[type="number"]:focus {
+                border: 1.5px solid #1976d2;
+                outline: none;
+            }
+            label {
+                margin-right: 1.2em;
+                font-size: 1rem;
+                vertical-align: middle;
+            }
+            p {
+                margin: 1em 0 0.5em 0;
+            }
+            .data-values {
+                background: #f1f8fe;
+                border-radius: 8px;
+                padding: 1.2em 1.5em;
+                margin: 1.5em 0 1em 0;
+                font-size: 90%em;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+                font-family: 'Roboto Mono', 'Menlo', 'Consolas', monospace;
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 0.2em 1.5em;
+                line-height: 1.8;
+                letter-spacing: 0.01em;
+                word-break: break-all;
+            }
+            .data-label {
+                color: #1976d2;
+                font-weight: bold;
+                text-align: right;
+                padding-right: 0.5em;
+            }
+            .data-value {
+                color: #222;
+                font-weight: 500;
+                text-align: left;
+            }
+            .toggle-btn {
+                background: #1976d2;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                padding: 0.5em 1.5em;
+                font-size: 1rem;
+                font-weight: 500;
+                margin: 0.2em 0.5em 0.2em 0;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .toggle-btn.active {
+                background: #d32f2f;
+            }
+            .toggle-btn:focus {
+                outline: 2px solid #1976d2;
+            }
+            .gain-group {
+                display: flex;
+                align-items: center;
+                gap: 0.3em;
+            }
+            .form-row {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 1.2em 1.2em;
+                margin-bottom: 0.7em;
+            }
+            .form-row .gain-group {
+                margin-right: 0.5em;
+            }
+            .form-row .gain-group label,
+            .form-row .gain-group input,
+            .form-row .gain-group span {
+                margin: 0;
+            }
+            .form-row .checkbox-label {
+                margin-left: 1.2em;
+            }
+            .radio-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1.2em;
+                margin-bottom: 1.2em;
+            }
+            .radio-row label {
+                margin: 0;
+            }
+            footer {
+                margin-top: 2.5em;
+                padding: 1.2em 0 0.5em 0;
+                text-align: center;
+                color: #789;
+                font-size: 0.98em;
+                background: none;
+                border-top: 1px solid #e0e5ea;
+                letter-spacing: 0.01em;
+            }
+            footer a {
+                color: #1976d2;
+                text-decoration: none;
+                margin-right: 1.2em;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+            footer a:hover {
+                color: #d32f2f;
+                text-decoration: underline;
+            }
+            @media (max-width: 700px) {
+                #app {
+                    max-width: 98vw;
+                    padding: 10vw 2vw 2vw 2vw;
+                }
+                #canvas {
+                    height: 40vw;
+                    min-height: 180px;
+                }
+            }
 		</style>
 	</head>
 	<body>
 		<div id="app">
-			<md-app>
-				<md-app-content>
-					<md-button class="md-raised" @click="start">start</md-button>
-					<md-button class="md-raised" @click="stop">stop</md-button>
-					<p>無線機の試験用に等ゲイン (RMS) の正弦波または疑似音声<!-- 、疑似信号 -->を発生させます。OS の設定や出力装置によって出力電圧は変わりますので、単位はありません。Gain は 1.0 に対する比で dB になっています</p>
-					<p>疑似音声は ITU-T G.227 の特性に従ってホワイトノイズをフィルタすることで発生させています (デジタルフィルタ)</p>
-					<md-field>
-						<label>Gain</label>
-						<md-input type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue"></md-input>
-						<span class="md-suffix">dB</span>
-					</md-field>
-
-					<p>
-					<md-checkbox v-model="offset10dB">F3E, F1E, G1E 用:+10dB</md-checkbox>
-					</p>
-
-					<p>
-					<md-radio v-model="waveType" value="sine1000Hz">1000Hz 正弦波</md-radio>
-					<md-radio v-model="waveType" value="sine1500Hz">1500Hz 正弦波</md-radio>
-					<md-radio v-model="waveType" value="pseudoAudio">疑似音声</md-radio>
-					<md-radio v-model="waveType" value="whitenoise">ホワイトノイズ</md-radio>
-					</p>
-
-
-					<p>
-					rate: {{gainValueRate}}<br />
-					avg: {{avg}}<br/>
-					rms: {{rms}}<br/>
-					peak: {{peak}}
-					</p>
-
-					<div id="canvas">
-						<canvas ref="spectrumGrid" width="1200" height="1024"></canvas>
-						<canvas ref="spectrum" width="1200" height="1024"></canvas>
-					</div>
-				</md-app-content>
-			</md-app>
+			<div>
+				<h1 style="margin-bottom: 1.2em; font-size: 1.7em; letter-spacing: 0.02em;">試験用 疑似音声発生器</h1>
+				<p>無線機の試験用に等ゲイン (RMS) の正弦波または疑似音声<!-- 、疑似信号 -->を発生させます。OS の設定や出力装置によって出力電圧は変わりますので、単位はありません。Gain は 1.0 に対する比で dB になっています</p>
+				<p>疑似音声は ITU-T G.227 の特性に従ってホワイトノイズをフィルタすることで発生させています (デジタルフィルタ)</p>
+				<div class="form-row">
+					<button class="toggle-btn" :class="{active: isStarted}" @click="toggleStartStop">
+						{{ isStarted ? 'Stop' : 'Start' }}
+					</button>
+					<span class="gain-group">
+						<label for="gainValue">Gain</label>
+						<input id="gainValue" type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue">
+						<span>dB</span>
+					</span>
+					<label class="checkbox-label"><input type="checkbox" id="offset10dB" v-model="offset10dB">F3E, F1E, G1E 用:+10dB</label>
+				</div>
+				<div class="radio-row">
+					<label><input type="radio" name="waveType" value="sine1000Hz" v-model="waveType">1000Hz 正弦波</label>
+					<label><input type="radio" name="waveType" value="sine1500Hz" v-model="waveType">1500Hz 正弦波</label>
+					<label><input type="radio" name="waveType" value="pseudoAudio" v-model="waveType">疑似音声</label>
+					<label><input type="radio" name="waveType" value="whitenoise" v-model="waveType">ホワイトノイズ</label>
+				</div>
+				<pre class="data-values">
+				  <span class="data-label">gainValue:</span> <span class="data-value">{{ gainValue }} dB</span>
+				  <span class="data-label">rms:</span> <span class="data-value">{{ rms }}</span>
+				  <span class="data-label">rate:</span> <span class="data-value">{{ gainValueRate }}</span>
+				  <span class="data-label">avg:</span> <span class="data-value">{{ avg }}</span>
+				  <span class="data-label">peak:</span> <span class="data-value">{{ peak }}</span>
+				</pre>
+				<div class="canvas">
+					<canvas ref="spectrumGrid" width="1200" height="1024"></canvas>
+					<canvas ref="spectrum" width="1200" height="1024"></canvas>
+				</div>
+			</div>
+			<footer>
+                <a href="https://github.com/cho45/pseudo-audio-signal" target="_blank" rel="noopener">GitHub Repository</a>
+                <span style="color:#bbb;">&copy; cho45</span>
+            </footer>
 		</div>
-		<script src="script.js" type="module"></script>
+		<script src="script.js" type="module" defer></script>
 	</body>
 </html>
