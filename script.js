@@ -2,8 +2,6 @@ import { createApp } from 'https://cdn.jsdelivr.net/npm/vue@3.5.17/dist/vue.esm-
 import { NoiseNode } from "./noise-node.js";
 
 const appOptions = {
-	tempalte: document.querySelector('#app').innerHTML,
-
 	data() {
 		return {
 			gainValue: -20,
@@ -157,6 +155,9 @@ const appOptions = {
 		},
 
 		applySetting: function () {
+			if (!this.audioContext) {
+				return;
+			}
 			this.oscillatorGain.gain.value = 0;
 			this.pseudoAudioGain.gain.value = 0;
 			this.whitenoiseGain.gain.value = 0;
