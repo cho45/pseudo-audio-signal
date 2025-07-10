@@ -13,6 +13,12 @@ WebAudio で音声を生成しています。白色雑音を生成するため�
  * Mozilla Firefox 76
  * Microsoft Edge 79
 
+## 測定器としての使用方法
+
+実際の無線機測定に使用する場合は、以下のガイドを参照してください：
+
+- **[測定器としての使用ガイド](./MEASUREMENT_GUIDE.md)** - DAC選定、校正方法、セットアップ手順
+
 ## ITU-T G.227 のフィルタ設計
 
 <img src="./docs/G.227-curve.png">
