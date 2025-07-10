@@ -23,6 +23,42 @@ ITU-T G.227 記載のアナログフィルタを双一次変換してデジタ�
 
 - https://nbviewer.jupyter.org/github/cho45/pseudo-audio-signal/blob/master/docs/03-iir-fir.ipynb
 
+## 実装アーキテクチャ
+
+### 信号処理フロー
+
+```
+White Noise → IIR Filter → FIR Filter → Output
+Generator      (4th order)   (Correction)
+   |               |             |
+   |               |             |
+AudioWorklet   coeffs.json[0] coeffs.json[1]
+```
+
+### 雑音発生方式
+
+ホワイトノイズ生成には **Box-Muller変換** を使用し、正規分布に従う高品質な雑音を生成しています：
+
+### フィルタ係数
+
+すべてのフィルタ係数は `coeffs.json` に事前計算済みで格納されています：
+
+- `coeffs.json[0]`: IIRフィルタ係数 (双一次変換によるデジタル化)
+- `coeffs.json[1]`: FIRフィルタ係数 (高周波誤差補正用)
+
+### WebAudio API実装
+
+```javascript
+// IIRフィルタ (4次)
+const iirFilter = audioContext.createIIRFilter(coeffs[0].num, coeffs[0].den);
+
+// FIRフィルタ (畳み込み)
+const firFilter = audioContext.createConvolver();
+// coeffs[1] をインパルス応答として設定
+```
+
+この2段階のフィルタリングにより、ITU-T G.227の理論特性を高精度で実現しています。
+
 ## 参考資料
 
  * <a href="https://www.tele.soumu.go.jp/resource/j/equ/tech/betu/35.pdf">別表第三十五 証明規則第２条第１項第12号に掲げる無線設備の試験方法</a> (アマチュア無線機の試験方法)

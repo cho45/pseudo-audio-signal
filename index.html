@@ -4,7 +4,7 @@
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
-		<title>試験用 疑似音声発生器</title>
+		<title>ITU-T G.227準拠 疑似音声発生器</title>
 
 		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
 
@@ -184,6 +184,32 @@
                 color: #d32f2f;
                 text-decoration: underline;
             }
+            /* Accessibility styles */
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+            
+            /* Focus styles */
+            button:focus, input:focus {
+                outline: 2px solid #1976d2;
+                outline-offset: 2px;
+            }
+            
+            /* Fieldset styles */
+            fieldset {
+                border: none;
+                margin: 0;
+                padding: 0;
+            }
+            
             @media (max-width: 700px) {
                 #app {
                     max-width: 98vw;
@@ -198,44 +224,97 @@
 	</head>
 	<body>
 		<div id="app">
-			<div>
-				<h1 style="margin-bottom: 1.2em; font-size: 1.7em; letter-spacing: 0.02em;">ITU-T G.227準拠 疑似音声発生器</h1>
-				<p>無線機の試験用に、一定のRMS値を持つ正弦波または疑似音声を発生させます。出力電圧はOSの設定や出力装置に依存するため相対値で表示します。</p>
-				<p>疑似音声は ITU-T G.227 の特性に従ってホワイトノイズをフィルタすることで発生させています (デジタルフィルタ)</p>
-				<div class="form-row">
-					<button class="toggle-btn" :class="{active: isStarted}" @click="toggleStartStop">
+			<main role="main">
+				<header>
+					<h1 style="margin-bottom: 1.2em; font-size: 1.7em; letter-spacing: 0.02em;">ITU-T G.227準拠 疑似音声発生器</h1>
+					<p>無線機の試験用に、一定のRMS値を持つ正弦波または疑似音声を発生させます。出力電圧はOSの設定や出力装置に依存するため相対値で表示します。</p>
+					<p>疑似音声は ITU-T G.227 の特性に従ってホワイトノイズをフィルタすることで発生させています (デジタルフィルタ)</p>
+				</header>
+				<section aria-labelledby="controls-heading">
+					<h2 id="controls-heading" class="sr-only">音声出力制御</h2>
+					<div class="form-row">
+					<button class="toggle-btn" :class="{active: isStarted}" @click="toggleStartStop" 
+						:aria-label="isStarted ? '音声出力を停止' : '音声出力を開始'" 
+						:aria-describedby="'output-status'">
 						{{ isStarted ? 'Stop' : 'Start' }}
 					</button>
 					<span class="gain-group">
 						<label for="gainValue">Gain</label>
-						<input id="gainValue" type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue">
+						<input id="gainValue" type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue" 
+							aria-describedby="gain-description" 
+							aria-label="音声出力レベル（dB）">
 						<span>dB</span>
 					</span>
-					<label class="checkbox-label"><input type="checkbox" id="offset10dB" v-model="offset10dB">F3E, F1E, G1E 用:+10dB</label>
+					<label class="checkbox-label">
+						<input type="checkbox" id="offset10dB" v-model="offset10dB" 
+							aria-describedby="offset-description">
+						F3E, F1E, G1E 用:+10dB
+					</label>
 				</div>
-				<p style="margin: 0.5em 0; font-size: 0.9em; color: #666;">Gainは出力レベルを調整するdB値です（0dBが最大出力、マイナス値で減衰）</p>
-				<div class="radio-row">
-					<label><input type="radio" name="waveType" value="sine1000Hz" v-model="waveType">1000Hz 正弦波</label>
-					<label><input type="radio" name="waveType" value="sine1500Hz" v-model="waveType">1500Hz 正弦波</label>
-					<label><input type="radio" name="waveType" value="pseudoAudio" v-model="waveType">疑似音声</label>
-					<label><input type="radio" name="waveType" value="whitenoise" v-model="waveType">ホワイトノイズ</label>
+				<p id="gain-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666;">Gainは出力レベルを調整するdB値です（0dBが最大出力、マイナス値で減衰）</p>
+				<p id="offset-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">F3E, F1E, G1E試験時に必要な10dBのオフセットゲインを適用</p>
+				<fieldset class="radio-row">
+					<legend class="sr-only">波形タイプ選択</legend>
+					<label><input type="radio" name="waveType" value="sine1000Hz" v-model="waveType" 
+						aria-describedby="wave-description">1000Hz 正弦波</label>
+					<label><input type="radio" name="waveType" value="sine1500Hz" v-model="waveType" 
+						aria-describedby="wave-description">1500Hz 正弦波</label>
+					<label><input type="radio" name="waveType" value="pseudoAudio" v-model="waveType" 
+						aria-describedby="wave-description">疑似音声</label>
+					<label><input type="radio" name="waveType" value="whitenoise" v-model="waveType" 
+						aria-describedby="wave-description">ホワイトノイズ</label>
+				</fieldset>
+				<p id="wave-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">出力する音声信号の種類を選択</p>
+				</section>
+				<!-- Live regions for screen readers -->
+				<div id="output-status" aria-live="polite" class="sr-only">
+					{{ isStarted ? '音声出力中' : '音声停止中' }}
 				</div>
-				<pre class="data-values">
+				<div id="gain-status" aria-live="polite" class="sr-only">
+					現在のゲイン: {{ gainValue }} dB
+				</div>
+				<div id="measurement-status" aria-live="polite" class="sr-only">
+					RMS値: {{ rms.toFixed(3) }}
+				</div>
+				
+				<section aria-labelledby="measurements-heading">
+					<h2 id="measurements-heading" class="sr-only">測定値</h2>
+					<pre class="data-values" aria-label="測定値表示">
 				  <span class="data-label">gainValue:</span> <span class="data-value">{{ gainValue }} dB</span>
 				  <span class="data-label">rms:</span> <span class="data-value">{{ rms }}</span>
 				  <span class="data-label">rate:</span> <span class="data-value">{{ gainValueRate }}</span>
 				  <span class="data-label">avg:</span> <span class="data-value">{{ avg }}</span>
 				  <span class="data-label">peak:</span> <span class="data-value">{{ peak }}</span>
 				</pre>
-				<div class="canvas">
-					<canvas ref="spectrumGrid" width="1200" height="1024"></canvas>
-					<canvas ref="spectrum" width="1200" height="1024"></canvas>
+				</section>
+				
+				<section aria-labelledby="spectrum-heading">
+					<h2 id="spectrum-heading" class="sr-only">周波数スペクトラム</h2>
+					<div class="canvas" role="img" aria-label="周波数スペクトラム表示">
+					<canvas ref="spectrumGrid" width="1200" height="1024" aria-hidden="true"></canvas>
+					<canvas ref="spectrum" width="1200" height="1024" aria-hidden="true"></canvas>
+					<p class="sr-only">現在の音声信号の周波数成分をグラフで表示しています。横軸は周波数（Hz）、縦軸は音圧レベル（dB）です。</p>
 				</div>
-			</div>
+				</section>
+			</main>
+			<details style="margin-top: 2em; font-size: 0.9em;">
+				<summary style="cursor: pointer; color: #1976d2; font-weight: 500;">キーボードショートカット</summary>
+				<div style="margin-top: 1em; padding: 1em; background: #f9f9f9; border-radius: 8px;">
+					<ul style="margin: 0; padding-left: 1.5em; line-height: 1.6;">
+						<li><strong>スペースキー</strong>: Start/Stop切り替え</li>
+						<li><strong>↑/↓キー</strong>: ゲイン値調整 (±1dB)</li>
+						<li><strong>1キー</strong>: 1000Hz正弦波</li>
+						<li><strong>2キー</strong>: 1500Hz正弦波</li>
+						<li><strong>3キー</strong>: 疑似音声</li>
+						<li><strong>4キー</strong>: ホワイトノイズ</li>
+						<li><strong>O / +キー</strong>: +10dBオフセット切り替え</li>
+					</ul>
+				</div>
+			</details>
 			<footer>
-                <a href="https://github.com/cho45/pseudo-audio-signal" target="_blank" rel="noopener">GitHub Repository</a>
-                <span style="color:#bbb;">&copy; cho45</span>
-            </footer>
+				<a href="https://github.com/cho45/pseudo-audio-signal" target="_blank" rel="noopener">GitHub Repository</a>
+				<span style="color:#bbb;">&copy; cho45</span>
+			</footer>
 		</div>
 		<script src="script.js" type="module" defer></script>
 	</body>

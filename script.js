@@ -151,11 +151,12 @@ const appOptions = {
 				};
 				requestAnimationFrame(draw);
 			}
+			this.isStarted = true;
 			this.applySetting();
 		},
 
 		applySetting: function () {
-			if (!this.audioContext) {
+			if (!this.isStarted) {
 				return;
 			}
 			this.oscillatorGain.gain.value = 0;
@@ -171,7 +172,8 @@ const appOptions = {
 					this.oscillatorGain.gain.value = Math.sqrt(2);
 					break;
 				case "pseudoAudio":
-					this.pseudoAudioGain.gain.value = 6.666;
+					// see also: docs/calculate_rms_normalization.py
+					this.pseudoAudioGain.gain.value = 6.69283
 					console.log(this.pseudoAudioGain.gain.value);
 					break;
 				case "whitenoise":
@@ -184,6 +186,7 @@ const appOptions = {
 
 		stop: async function () {
 			this.outGain.gain.value = 0;
+			this.isStarted = false;
 		},
 
 		toggleStartStop: function () {
@@ -192,7 +195,31 @@ const appOptions = {
 			} else {
 				this.start();
 			}
-			this.isStarted = !this.isStarted;
+		},
+
+		handleKeyDown: function (event) {
+			// 入力フィールドにフォーカスがある場合はスキップ
+			if (event.target.tagName === 'INPUT') {
+				return;
+			}
+
+			const keyActions = {
+				'Space': () => this.toggleStartStop(),
+				'ArrowUp': () => this.gainValue = Math.min(0, this.gainValue + 1),
+				'ArrowDown': () => this.gainValue = Math.max(-100, this.gainValue - 1),
+				'Digit1': () => this.waveType = 'sine1000Hz',
+				'Digit2': () => this.waveType = 'sine1500Hz',
+				'Digit3': () => this.waveType = 'pseudoAudio',
+				'Digit4': () => this.waveType = 'whitenoise',
+				'KeyO': () => this.offset10dB = !this.offset10dB,
+				'Equal': () => this.offset10dB = !this.offset10dB, // + key (without shift)
+			};
+
+			const action = keyActions[event.code];
+			if (action) {
+				event.preventDefault();
+				action();
+			}
 		},
 	},
 
@@ -205,6 +232,9 @@ const appOptions = {
 	async mounted() {
 		this.coeffsPromise = (await fetch('./coeffs.json')).json();
 
+		// キーボードイベントリスナーの追加
+		document.addEventListener('keydown', this.handleKeyDown);
+
 		this.$watch('gainValue', (n) => {
 			this.applySetting();
 		});
@@ -216,6 +246,11 @@ const appOptions = {
 		this.$watch('offset10dB', () => {
 			this.applySetting();
 		});
+	},
+
+	unmounted() {
+		// キーボードイベントリスナーの削除
+		document.removeEventListener('keydown', this.handleKeyDown);
 	}
 };
 
