@@ -7,10 +7,13 @@ const appOptions = {
 			gainValue: -20,
 			avg: 0.0,
 			rms: 0.0,
+			rmsMovingAvg: 0.0,
 			peak: 0.0,
 			waveType: "pseudoAudio",
 			offset10dB: false, // F3E, F1E, G1E のときは 正弦波に対して +10dB の音声入力が必要
 			isStarted: false,
+			rmsHistory: [], // 移動平均用のRMS履歴
+			customFreq: 1000, // カスタム正弦波の周波数
 		};
 	},
 
@@ -146,6 +149,13 @@ const appOptions = {
 					this.avg = data.reduce( (r, i) => r + Math.abs(i), 0) / data.length;
 					this.rms = Math.sqrt( data.reduce( (r, i) => r + (i * i), 0) / data.length );
 					this.peak = Math.max(...data);
+					
+					// 移動平均の計算（5秒間、約60FPS）
+					this.rmsHistory.push(this.rms);
+					if (this.rmsHistory.length > 120) {
+						this.rmsHistory.shift();
+					}
+					this.rmsMovingAvg = this.rmsHistory.reduce((sum, val) => sum + val, 0) / this.rmsHistory.length;
 
 					requestAnimationFrame(draw);
 				};
@@ -169,6 +179,10 @@ const appOptions = {
 					break;
 				case "sine1500Hz":
 					this.oscillatorNode.frequency.value = 1500;
+					this.oscillatorGain.gain.value = Math.sqrt(2);
+					break;
+				case "sineCustom":
+					this.oscillatorNode.frequency.value = Math.max(20, Math.min(20000, this.customFreq));
 					this.oscillatorGain.gain.value = Math.sqrt(2);
 					break;
 				case "pseudoAudio":
@@ -207,12 +221,19 @@ const appOptions = {
 				'Space': () => this.toggleStartStop(),
 				'ArrowUp': () => this.gainValue = Math.min(0, this.gainValue + 1),
 				'ArrowDown': () => this.gainValue = Math.max(-100, this.gainValue - 1),
-				'Digit1': () => this.waveType = 'sine1000Hz',
-				'Digit2': () => this.waveType = 'sine1500Hz',
-				'Digit3': () => this.waveType = 'pseudoAudio',
-				'Digit4': () => this.waveType = 'whitenoise',
+				'Digit1': () => this.waveType = 'pseudoAudio',
+				'Digit2': () => this.waveType = 'whitenoise',
+				'Digit3': () => this.waveType = 'sine1000Hz',
+				'Digit4': () => this.waveType = 'sine1500Hz',
+				'Digit5': () => this.waveType = 'sineCustom',
 				'KeyO': () => this.offset10dB = !this.offset10dB,
 				'Equal': () => this.offset10dB = !this.offset10dB, // + key (without shift)
+				'KeyF': () => {
+					if (this.waveType === 'sineCustom') {
+						const freqInput = document.getElementById('customFreq');
+						if (freqInput) freqInput.focus();
+					}
+				}
 			};
 
 			const action = keyActions[event.code];
@@ -245,6 +266,12 @@ const appOptions = {
 
 		this.$watch('offset10dB', () => {
 			this.applySetting();
+		});
+
+		this.$watch('customFreq', () => {
+			if (this.waveType === 'sineCustom') {
+				this.applySetting();
+			}
 		});
 	},
 

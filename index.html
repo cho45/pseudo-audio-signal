@@ -102,6 +102,19 @@
                 letter-spacing: 0.01em;
                 word-break: break-all;
             }
+            
+            .rms-highlight {
+                grid-column: 1 / -1;
+                text-align: center;
+                font-size: 1.8em;
+                font-weight: bold;
+                color: #1976d2;
+                margin-bottom: 0.5em;
+                padding: 0.3em;
+                background: rgba(25, 118, 210, 0.1);
+                border-radius: 6px;
+            }
+            
             .data-label {
                 color: #1976d2;
                 font-weight: bold;
@@ -112,24 +125,6 @@
                 color: #222;
                 font-weight: 500;
                 text-align: left;
-            }
-            .toggle-btn {
-                background: #1976d2;
-                color: #fff;
-                border: none;
-                border-radius: 6px;
-                padding: 0.5em 1.5em;
-                font-size: 1rem;
-                font-weight: 500;
-                margin: 0.2em 0.5em 0.2em 0;
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-            .toggle-btn.active {
-                background: #d32f2f;
-            }
-            .toggle-btn:focus {
-                outline: 2px solid #1976d2;
             }
             .gain-group {
                 display: flex;
@@ -210,6 +205,138 @@
                 padding: 0;
             }
             
+            /* Control group styles */
+            .control-group {
+                background: #f9fbfd;
+                border: 1px solid #e3eaf2;
+                border-radius: 8px;
+                padding: 1rem 1.2rem;
+                margin-bottom: 1rem;
+            }
+            
+            .control-group h3 {
+                margin: 0 0 0.8rem 0;
+                font-size: 1rem;
+                font-weight: 500;
+                color: #1976d2;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .control-group h3::before {
+                content: "";
+                width: 3px;
+                height: 1rem;
+                background: #1976d2;
+                border-radius: 2px;
+            }
+            
+            .control-group .radio-row {
+                margin-bottom: 0;
+            }
+            
+            .control-group .gain-group {
+                margin-bottom: 0.5rem;
+            }
+            
+            .control-group .checkbox-label {
+                margin-left: 0;
+            }
+            
+            .custom-freq-input {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+                padding: 0.5rem;
+                background: #f9fbfd;
+                border: 1px solid #e3eaf2;
+                border-radius: 4px;
+            }
+            
+            .custom-freq-input input[type="number"] {
+                width: 80px;
+                margin-right: 0;
+            }
+            
+            .control-button {
+                text-align: center;
+            }
+            
+            .toggle-btn {
+                font-size: 1.5rem;
+                padding: 1rem 2.5rem;
+                min-width: 150px;
+                background: #4caf50;
+                color: #fff;
+                font-weight: 600;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .toggle-btn:hover {
+                background: #45a049;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            }
+            
+            .toggle-btn.active {
+                background: #f44336;
+                animation: pulse 2s infinite;
+            }
+            
+            .toggle-btn.active:hover {
+                background: #da190b;
+                box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+            }
+            
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+            }
+            
+            /* 2カラムレイアウト */
+            .control-columns {
+                display: flex;
+                gap: 1.5rem;
+                align-items: stretch;
+                margin-bottom: 1rem;
+            }
+            
+            .control-columns .control-group {
+                margin-bottom: 0;
+            }
+            
+            .control-columns .control-group:first-child {
+                flex: 1;
+            }
+            
+            .control-button-container {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .control-columns .control-group:last-child {
+                flex: 1;
+            }
+            
+            @media (max-width: 600px) {
+                .control-columns {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                
+                .control-columns .control-group {
+                    margin-bottom: 1rem;
+                }
+            }
+            
             @media (max-width: 700px) {
                 #app {
                     max-width: 98vw;
@@ -232,39 +359,62 @@
 				</header>
 				<section aria-labelledby="controls-heading">
 					<h2 id="controls-heading" class="sr-only">音声出力制御</h2>
-					<div class="form-row">
-					<button class="toggle-btn" :class="{active: isStarted}" @click="toggleStartStop" 
-						:aria-label="isStarted ? '音声出力を停止' : '音声出力を開始'" 
-						:aria-describedby="'output-status'">
-						{{ isStarted ? 'Stop' : 'Start' }}
-					</button>
-					<span class="gain-group">
-						<label for="gainValue">Gain</label>
-						<input id="gainValue" type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue" 
-							aria-describedby="gain-description" 
-							aria-label="音声出力レベル（dB）">
-						<span>dB</span>
-					</span>
-					<label class="checkbox-label">
-						<input type="checkbox" id="offset10dB" v-model="offset10dB" 
-							aria-describedby="offset-description">
-						F3E, F1E, G1E 用:+10dB
-					</label>
-				</div>
-				<p id="gain-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666;">Gainは出力レベルを調整するdB値です（0dBが最大出力、マイナス値で減衰）</p>
-				<p id="offset-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">F3E, F1E, G1E試験時に必要な10dBのオフセットゲインを適用</p>
-				<fieldset class="radio-row">
-					<legend class="sr-only">波形タイプ選択</legend>
-					<label><input type="radio" name="waveType" value="sine1000Hz" v-model="waveType" 
-						aria-describedby="wave-description">1000Hz 正弦波</label>
-					<label><input type="radio" name="waveType" value="sine1500Hz" v-model="waveType" 
-						aria-describedby="wave-description">1500Hz 正弦波</label>
-					<label><input type="radio" name="waveType" value="pseudoAudio" v-model="waveType" 
-						aria-describedby="wave-description">疑似音声</label>
-					<label><input type="radio" name="waveType" value="whitenoise" v-model="waveType" 
-						aria-describedby="wave-description">ホワイトノイズ</label>
-				</fieldset>
-				<p id="wave-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">出力する音声信号の種類を選択</p>
+					
+					<!-- 制御・レベル設定グループ -->
+					<div class="control-columns">
+						<div class="control-button-container">
+							<button class="toggle-btn" :class="{active: isStarted}" @click="toggleStartStop" 
+								:aria-label="isStarted ? '音声出力を停止' : '音声出力を開始'" 
+								:aria-describedby="'output-status'">
+								{{ isStarted ? 'Stop' : 'Start' }}
+							</button>
+						</div>
+						<div class="control-group" aria-labelledby="level-controls-heading">
+							<h3 id="level-controls-heading" class="sr-only">レベル設定</h3>
+							<div class="gain-group">
+								<label for="gainValue">Gain</label>
+								<input id="gainValue" type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue" 
+									aria-describedby="gain-description" 
+									aria-label="音声出力レベル（dB）">
+								<span>dB</span>
+							</div>
+							<label class="checkbox-label">
+								<input type="checkbox" id="offset10dB" v-model="offset10dB" 
+									aria-describedby="offset-description">
+								F3E, F1E, G1E 用:+10dB
+							</label>
+							<p id="gain-description" style="margin: 0.5em 0 0 0; font-size: 0.85em; color: #666;">0dBが最大出力、マイナス値で減衰</p>
+						</div>
+					</div>
+					
+					<!-- 音源設定グループ -->
+					<div class="control-group" aria-labelledby="wave-controls-heading">
+						<h3 id="wave-controls-heading" class="sr-only">音源設定</h3>
+						<div class="radio-row">
+							<label><input type="radio" name="waveType" value="pseudoAudio" v-model="waveType" 
+								aria-describedby="wave-description">疑似音声</label>
+							<label><input type="radio" name="waveType" value="whitenoise" v-model="waveType" 
+								aria-describedby="wave-description">ホワイトノイズ</label>
+						</div>
+						<div class="radio-row" style="margin-top: 1rem;">
+							<label><input type="radio" name="waveType" value="sine1000Hz" v-model="waveType" 
+								aria-describedby="wave-description">1000Hz 正弦波</label>
+							<label><input type="radio" name="waveType" value="sine1500Hz" v-model="waveType" 
+								aria-describedby="wave-description">1500Hz 正弦波</label>
+							<label><input type="radio" name="waveType" value="sineCustom" v-model="waveType" 
+								aria-describedby="wave-description">カスタム正弦波</label>
+						</div>
+						<div v-show="waveType === 'sineCustom'" class="custom-freq-input">
+							<label for="customFreq">周波数:</label>
+							<input id="customFreq" type="number" min="20" max="20000" step="1" v-model="customFreq" 
+								aria-label="カスタム周波数（Hz）">
+							<span>Hz</span>
+							<span style="font-size: 0.8em; color: #666; margin-left: 0.5rem;">(20-20000Hz)</span>
+						</div>
+					</div>
+					
+					<p id="wave-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">出力する音声信号の種類を選択</p>
+					<p id="offset-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">F3E, F1E, G1E試験時に必要な10dBのオフセットゲインを適用</p>
 				</section>
 				<!-- Live regions for screen readers -->
 				<div id="output-status" aria-live="polite" class="sr-only">
@@ -279,13 +429,13 @@
 				
 				<section aria-labelledby="measurements-heading">
 					<h2 id="measurements-heading" class="sr-only">測定値</h2>
-					<pre class="data-values" aria-label="測定値表示">
-				  <span class="data-label">gainValue:</span> <span class="data-value">{{ gainValue }} dB</span>
-				  <span class="data-label">rms:</span> <span class="data-value">{{ rms }}</span>
-				  <span class="data-label">rate:</span> <span class="data-value">{{ gainValueRate }}</span>
-				  <span class="data-label">avg:</span> <span class="data-value">{{ avg }}</span>
-				  <span class="data-label">peak:</span> <span class="data-value">{{ peak }}</span>
-				</pre>
+					<div class="data-values" aria-label="測定値表示">
+						<div class="rms-highlight">RMS: {{ rmsMovingAvg.toFixed(5) }} (avg)</div>
+						<span class="data-label">rms:</span> <span class="data-value">{{ rms.toFixed(5) }}</span>
+						<span class="data-label">avg:</span> <span class="data-value">{{ avg.toFixed(5) }}</span>
+						<span class="data-label">peak:</span> <span class="data-value">{{ peak.toFixed(5) }}</span>
+						<span class="data-label">rate:</span> <span class="data-value">{{ gainValueRate.toFixed(5) }}</span>
+					</div>
 				</section>
 				
 				<section aria-labelledby="spectrum-heading">
@@ -303,10 +453,12 @@
 					<ul style="margin: 0; padding-left: 1.5em; line-height: 1.6;">
 						<li><strong>スペースキー</strong>: Start/Stop切り替え</li>
 						<li><strong>↑/↓キー</strong>: ゲイン値調整 (±1dB)</li>
-						<li><strong>1キー</strong>: 1000Hz正弦波</li>
-						<li><strong>2キー</strong>: 1500Hz正弦波</li>
-						<li><strong>3キー</strong>: 疑似音声</li>
-						<li><strong>4キー</strong>: ホワイトノイズ</li>
+						<li><strong>1キー</strong>: 疑似音声</li>
+						<li><strong>2キー</strong>: ホワイトノイズ</li>
+						<li><strong>3キー</strong>: 1000Hz正弦波</li>
+						<li><strong>4キー</strong>: 1500Hz正弦波</li>
+						<li><strong>5キー</strong>: カスタム正弦波</li>
+						<li><strong>Fキー</strong>: 周波数入力フィールドにフォーカス（カスタム正弦波選択時）</li>
 						<li><strong>O / +キー</strong>: +10dBオフセット切り替え</li>
 					</ul>
 				</div>
