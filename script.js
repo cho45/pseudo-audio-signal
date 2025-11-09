@@ -150,7 +150,7 @@ const appOptions = {
 					this.rms = Math.sqrt( data.reduce( (r, i) => r + (i * i), 0) / data.length );
 					this.peak = Math.max(...data);
 					
-					// 移動平均の計算（5秒間、約60FPS）
+					// 移動平均の計算（2秒間、約60FPS = 120フレーム）
 					this.rmsHistory.push(this.rms);
 					if (this.rmsHistory.length > 120) {
 						this.rmsHistory.shift();
