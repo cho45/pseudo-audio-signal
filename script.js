@@ -161,14 +161,10 @@ const appOptions = {
 				};
 				requestAnimationFrame(draw);
 			}
-			this.isStarted = true;
 			this.applySetting();
 		},
 
 		applySetting: function () {
-			if (!this.isStarted) {
-				return;
-			}
 			this.oscillatorGain.gain.value = 0;
 			this.pseudoAudioGain.gain.value = 0;
 			this.whitenoiseGain.gain.value = 0;
@@ -186,8 +182,7 @@ const appOptions = {
 					this.oscillatorGain.gain.value = Math.sqrt(2);
 					break;
 				case "pseudoAudio":
-					// see also: docs/calculate_rms_normalization.py
-					this.pseudoAudioGain.gain.value = 6.69283
+					this.pseudoAudioGain.gain.value = 6.666;
 					console.log(this.pseudoAudioGain.gain.value);
 					break;
 				case "whitenoise":
@@ -200,7 +195,6 @@ const appOptions = {
 
 		stop: async function () {
 			this.outGain.gain.value = 0;
-			this.isStarted = false;
 		},
 
 		toggleStartStop: function () {
@@ -209,6 +203,7 @@ const appOptions = {
 			} else {
 				this.start();
 			}
+			this.isStarted = !this.isStarted;
 		},
 
 		handleKeyDown: function (event) {
@@ -252,9 +247,6 @@ const appOptions = {
 
 	async mounted() {
 		this.coeffsPromise = (await fetch('./coeffs.json')).json();
-
-		// キーボードイベントリスナーの追加
-		document.addEventListener('keydown', this.handleKeyDown);
 
 		this.$watch('gainValue', (n) => {
 			this.applySetting();
