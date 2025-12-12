@@ -23,15 +23,14 @@ export class NoiseNode extends AudioWorkletNode {
 
 					this.func = {
 						whitenoise: function (chData) {
-							const variance = 1;
-							const average = 0;
 							for (let i = 0; i < chData.length; i += 2) {
-								// Whitenoise by Box-Muller transform
-								const a = Math.random(), b = Math.random();
-								const x = Math.sqrt(-2 * Math.log(a)) * Math.sin(2 * Math.PI * b) * variance + average;
-								const y = Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b) * variance + average;
-								chData[i+0] = x;
-								chData[i+1] = y;
+								// Box-Muller transform: generate two independent standard normal random variables
+								// Math.random() returns [0, 1), use || to avoid log(0) = -Infinity
+								const a = Math.random() || Number.MIN_VALUE;
+								const b = Math.random();
+								const r = Math.sqrt(-2 * Math.log(a));
+								chData[i+0] = r * Math.sin(2 * Math.PI * b);
+								chData[i+1] = r * Math.cos(2 * Math.PI * b);
 							}
 						}
 					}[this.type];
