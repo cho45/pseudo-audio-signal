@@ -14,6 +14,7 @@ const appOptions = {
 			isStarted: false,
 			rmsHistory: [], // 移動平均用のRMS履歴
 			customFreq: 1000, // カスタム正弦波の周波数
+			peakHoldData: null, // ピークホールド用のデータ
 		};
 	},
 
@@ -40,15 +41,23 @@ const appOptions = {
 				this.whitenoiseGain = this.audioContext.createGain();
 				this.whitenoiseGain.gain.value = 0;
 
-				const [iir1, coeffs] = await this.coeffsPromise;
-				console.log(iir1);
+				const allCoeffs = await this.coeffsPromise;
+				const sr = this.audioContext.sampleRate;
+				// 最も近いサンプリングレートの係数を選択
+				const availableSrs = Object.keys(allCoeffs).map(Number);
+				const targetSr = availableSrs.reduce((prev, curr) =>
+					Math.abs(curr - sr) < Math.abs(prev - sr) ? curr : prev
+				);
+				const { iir: iir1, fir: firCoeffs } = allCoeffs[targetSr];
+				
+				console.log(`Using coefficients for ${targetSr}Hz (Actual SR: ${sr}Hz)`);
 
 				this.iirFilterNode1 = this.audioContext.createIIRFilter(iir1.num, iir1.den);
 
-				const firBuffer = this.audioContext.createBuffer(1, coeffs.length, this.audioContext.sampleRate);
+				const firBuffer = this.audioContext.createBuffer(1, firCoeffs.length, sr);
 				const firData = firBuffer.getChannelData(0);
-				for (var i = 0, len = coeffs.length; i < len; i++) {
-					firData[i] = coeffs[i];
+				for (var i = 0, len = firCoeffs.length; i < len; i++) {
+					firData[i] = firCoeffs[i];
 				}
 
 				this.firFilterNode = this.audioContext.createConvolver();
@@ -131,9 +140,37 @@ const appOptions = {
 				const freqLog = new Float32Array(this.analyser.frequencyBinCount).map( (_, i) => Math.log( this.audioContext.sampleRate / this.analyser.fftSize * i) );
 				const draw = () => {
 					this.analyser.getFloatFrequencyData(data);
+					
+					// ピークホールドの更新
+					if (!this.peakHoldData || this.peakHoldData.length !== data.length) {
+						this.peakHoldData = new Float32Array(data);
+					} else {
+						for (let i = 0; i < data.length; i++) {
+							if (data[i] > this.peakHoldData[i]) {
+								this.peakHoldData[i] = data[i];
+							}
+						}
+					}
+
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+					// ピークホールドの描画
 					ctx.beginPath();
+					ctx.strokeStyle = "rgba(255, 0, 0, 0.3)";
+					for (var i = 0, len = this.analyser.frequencyBinCount; i < len; i++) {
+						const x = freqLog[i] / freqMax * canvas.width;
+						const y = (this.peakHoldData[i] - this.analyser.maxDecibels) / range;
+						if (i === 0) {
+							ctx.moveTo(x, (canvas.height * y));
+						} else {
+							ctx.lineTo(x, (canvas.height * y));
+						}
+					}
+					ctx.stroke();
+
+					// 現在のスペクトラムの描画
+					ctx.beginPath();
+					ctx.strokeStyle = "#000000";
 					for (var i = 0, len = this.analyser.frequencyBinCount; i < len; i++) {
 						const x = freqLog[i] / freqMax * canvas.width;
 						const y = (data[i] - this.analyser.maxDecibels) / range;
@@ -161,6 +198,8 @@ const appOptions = {
 				};
 				requestAnimationFrame(draw);
 			}
+			this.isStarted = true;
+			this.peakHoldData = null; // スタート時にピークホールドをクリア
 			this.applySetting();
 		},
 
