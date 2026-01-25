@@ -204,6 +204,7 @@ const appOptions = {
 		},
 
 		applySetting: function () {
+			if (!this.audioContext) return;  // AudioContext初期化前は何もしない
 			this.oscillatorGain.gain.value = 0;
 			this.pseudoAudioGain.gain.value = 0;
 			this.whitenoiseGain.gain.value = 0;
@@ -286,6 +287,9 @@ const appOptions = {
 
 	async mounted() {
 		this.coeffsPromise = (await fetch('./coeffs.json')).json();
+
+		// キーボードイベントリスナーの追加
+		document.addEventListener('keydown', this.handleKeyDown);
 
 		this.$watch('gainValue', (n) => {
 			this.applySetting();
