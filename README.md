@@ -25,7 +25,13 @@ WebAudio で音声を生成しています。白色雑音を生成するため�
 
 ITU-T G.227 記載のアナログフィルタを双一次変換してデジタルIIRフィルタとし、さらにFIRで補正しています。係数の算出は以下の通り Jupyter Notebook で行いました。
 
-理論特性に対する相対誤差は0.29%（dB換算で0.025dB）以下を実現しています。
+理論特性に対する誤差（RMSE）:
+
+| 帯域 | 44100Hz | 48000Hz |
+|------|---------|---------|
+| 10Hz〜ナイキスト | 0.025 dB (0.29%) | 0.022 dB (0.25%) |
+| G.227 Figure 2 範囲 (50Hz-10kHz) | 0.008 dB (0.09%) | 0.007 dB (0.08%) |
+| 電話音声帯域 (300Hz-3.4kHz) | 0.007 dB (0.08%) | 0.007 dB (0.08%) |
 
 - https://nbviewer.jupyter.org/github/cho45/pseudo-audio-signal/blob/master/docs/03-iir-fir.ipynb
 
