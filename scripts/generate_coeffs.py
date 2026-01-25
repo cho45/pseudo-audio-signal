@@ -1,6 +1,8 @@
+import json
+import os
+
 import numpy as np
 from scipy import signal
-import json
 
 def design_filters(sr):
     # ITU-T G.227 Analog Filter Specification
@@ -51,7 +53,10 @@ coeffs = {
     "48000": design_filters(48000)
 }
 
-with open('coeffs_new.json', 'w') as f:
+script_dir = os.path.dirname(os.path.abspath(__file__))
+output_path = os.path.join(script_dir, '..', 'coeffs.json')
+
+with open(output_path, 'w') as f:
     json.dump(coeffs, f, indent=2)
 
-print("Generated coeffs_new.json")
+print(f"Generated {output_path}")

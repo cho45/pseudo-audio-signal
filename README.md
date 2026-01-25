@@ -37,8 +37,7 @@ ITU-T G.227 記載のアナログフィルタを双一次変換してデジタ�
 White Noise → IIR Filter → FIR Filter → Output
 Generator      (4th order)   (Correction)
    |               |             |
-   |               |             |
-AudioWorklet   coeffs.json[0] coeffs.json[1]
+AudioWorklet   coeffs.iir    coeffs.fir
 ```
 
 ### 雑音発生方式
@@ -47,20 +46,32 @@ AudioWorklet   coeffs.json[0] coeffs.json[1]
 
 ### フィルタ係数
 
-すべてのフィルタ係数は `coeffs.json` に事前計算済みで格納されています：
+すべてのフィルタ係数は `coeffs.json` に事前計算済みで格納されています（44100Hz / 48000Hz 対応）：
 
-- `coeffs.json[0]`: IIRフィルタ係数 (双一次変換によるデジタル化)
-- `coeffs.json[1]`: FIRフィルタ係数 (高周波誤差補正用)
+```json
+{
+  "44100": {
+    "iir": { "num": [...], "den": [...] },
+    "fir": [...]
+  },
+  "48000": { ... }
+}
+```
+
+係数の再生成は `scripts/generate_coeffs.py` で行えます。
 
 ### WebAudio API実装
 
 ```javascript
+const sr = audioContext.sampleRate;  // 44100 or 48000
+const c = coeffs[sr];
+
 // IIRフィルタ (4次)
-const iirFilter = audioContext.createIIRFilter(coeffs[0].num, coeffs[0].den);
+const iirFilter = audioContext.createIIRFilter(c.iir.num, c.iir.den);
 
 // FIRフィルタ (畳み込み)
 const firFilter = audioContext.createConvolver();
-// coeffs[1] をインパルス応答として設定
+// c.fir をインパルス応答として設定
 ```
 
 この2段階のフィルタリングにより、ITU-T G.227の理論特性を高精度で実現しています。
