@@ -7,11 +7,9 @@ ITU-T G.227 疑似音声信号発生器
 
 ## 仕組みや利用技術
 
-WebAudio で音声を生成しています。白色雑音を生成するために AudioWorkletNode を使っているため、サポートするブラウザが必要です。
+WebAudio で音声を生成しています。白色雑音を生成するために <a href="https://caniuse.com/mdn-api_audioworkletnode">AudioWorkletNode</a> を使用しています（主要ブラウザで広くサポート）。
 
- * Google Chrome 67
- * Mozilla Firefox 76
- * Microsoft Edge 79
+**注意**: AudioWorklet は HTTPS 環境または localhost でのみ動作します。
 
 ## 測定器としての使用方法
 

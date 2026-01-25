@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  verify-coeffs:
+    name: Verify Filter Coefficients
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Run coefficient verification test
+        run: |
+          uv run --python 3.12 --with numpy --with scipy scripts/verify_coeffs.py --test

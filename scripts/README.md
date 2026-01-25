@@ -28,10 +28,15 @@ uv run --python 3.12 --with numpy --with scipy scripts/generate_coeffs.py
 ### フィルタ係数の検証
 
 ```bash
+# レポートモード（グラフ出力）
 uv run --python 3.12 --with numpy --with scipy --with matplotlib scripts/verify_coeffs.py
+
+# テストモード（CI用、基準値チェック）
+uv run --python 3.12 --with numpy --with scipy scripts/verify_coeffs.py --test
 ```
 
-ITU-T G.227 理論特性との誤差を評価し、`scripts/verification_result.png` に出力。
+- レポートモード: ITU-T G.227 理論特性との誤差を評価し、`scripts/verification_result.png` に出力
+- テストモード: 基準値を超えた場合 exit code 1 を返す（CI向け）
 
 ### FIR係数の最適化分析
 

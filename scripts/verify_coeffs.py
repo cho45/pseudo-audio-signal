@@ -2,19 +2,31 @@
 """
 coeffs.json の検証スクリプト
 生成されたフィルタ係数が ITU-T G.227 理論特性に対してどの程度の誤差があるかを評価
+
+使用方法:
+  通常モード（グラフ出力）: python verify_coeffs.py
+  テストモード（CI用）:     python verify_coeffs.py --test
 """
 
+import argparse
 import json
 import os
+import sys
 
 import numpy as np
 from scipy import signal
-import matplotlib.pyplot as plt
 
 # スクリプトのディレクトリを基準にパスを解決
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 COEFFS_PATH = os.path.join(SCRIPT_DIR, '..', 'coeffs.json')
 OUTPUT_PATH = os.path.join(SCRIPT_DIR, 'verification_result.png')
+
+# RMSE 基準値 (dB) - README記載値にマージンを加えた値
+THRESHOLDS = {
+    'full_band': 0.030,   # README: 0.025 dB
+    'g227_fig2': 0.010,   # README: 0.008 dB
+    'telephone': 0.010,   # README: 0.007 dB
+}
 
 
 def evaluate_performance(sr, iir_num, iir_den, fir_coeffs):
@@ -51,9 +63,32 @@ def evaluate_performance(sr, iir_num, iir_den, fir_coeffs):
     return result
 
 
-def main():
-    with open(COEFFS_PATH, 'r') as f:
-        coeffs = json.load(f)
+def run_test(coeffs):
+    """テストモード: 基準値を超えていないか検証"""
+    all_passed = True
+
+    for sr_str in ["44100", "48000"]:
+        sr = int(sr_str)
+        c = coeffs[sr_str]
+        result = evaluate_performance(sr, c['iir']['num'], c['iir']['den'], c['fir'])
+
+        print(f"Sampling Rate: {sr} Hz")
+
+        for band_name, threshold in THRESHOLDS.items():
+            rmse = result[band_name]['rmse']
+            passed = rmse <= threshold
+            status = "PASS" if passed else "FAIL"
+            print(f"  [{status}] {band_name}: RMSE={rmse:.4f} dB (threshold: {threshold:.3f} dB)")
+
+            if not passed:
+                all_passed = False
+
+    return 0 if all_passed else 1
+
+
+def run_report(coeffs):
+    """レポートモード: グラフ出力"""
+    import matplotlib.pyplot as plt
 
     plt.figure(figsize=(12, 8))
 
@@ -91,6 +126,23 @@ def main():
     plt.legend()
     plt.savefig(OUTPUT_PATH)
     print(f"Saved {OUTPUT_PATH}")
+
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Verify coeffs.json against ITU-T G.227')
+    parser.add_argument('--test', action='store_true',
+                        help='Run in test mode (exit 1 if thresholds exceeded)')
+    args = parser.parse_args()
+
+    with open(COEFFS_PATH, 'r') as f:
+        coeffs = json.load(f)
+
+    if args.test:
+        sys.exit(run_test(coeffs))
+    else:
+        sys.exit(run_report(coeffs))
 
 
 if __name__ == "__main__":
