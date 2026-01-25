@@ -213,7 +213,8 @@
                 margin-bottom: 1rem;
             }
             
-            .control-group h3 {
+            .control-group h3,
+            .control-group legend {
                 margin: 0 0 0.8rem 0;
                 font-size: 1rem;
                 font-weight: 500;
@@ -222,8 +223,9 @@
                 align-items: center;
                 gap: 0.5rem;
             }
-            
-            .control-group h3::before {
+
+            .control-group h3::before,
+            .control-group legend::before {
                 content: "";
                 width: 3px;
                 height: 1rem;
@@ -362,19 +364,17 @@
 					<!-- 制御・レベル設定グループ -->
 					<div class="control-columns">
 						<div class="control-button-container">
-							<button class="toggle-btn" :class="{active: isStarted}" @click="toggleStartStop" 
-								:aria-label="isStarted ? '音声出力を停止' : '音声出力を開始'" 
-								:aria-describedby="'output-status'">
+							<button class="toggle-btn" :class="{active: isStarted}" @click="toggleStartStop"
+								:aria-label="isStarted ? '音声出力を停止' : '音声出力を開始'">
 								{{ isStarted ? 'Stop' : 'Start' }}
 							</button>
 						</div>
 						<div class="control-group" aria-labelledby="level-controls-heading">
 							<h3 id="level-controls-heading" class="sr-only">レベル設定</h3>
 							<div class="gain-group">
-								<label for="gainValue">Gain</label>
-								<input id="gainValue" type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue" 
-									aria-describedby="gain-description" 
-									aria-label="音声出力レベル（dB）">
+								<label for="gainValue">Gain (dB)</label>
+								<input id="gainValue" type="number" min="-100.0" max="0.0" step="0.1" v-model="gainValue"
+									aria-describedby="gain-description">
 								<span>dB</span>
 							</div>
 							<label class="checkbox-label">
@@ -387,33 +387,34 @@
 					</div>
 					
 					<!-- 音源設定グループ -->
-					<div class="control-group" aria-labelledby="wave-controls-heading">
-						<h3 id="wave-controls-heading" class="sr-only">音源設定</h3>
-						<div class="radio-row">
-							<label><input type="radio" name="waveType" value="pseudoAudio" v-model="waveType" 
-								aria-describedby="wave-description">疑似音声</label>
-							<label><input type="radio" name="waveType" value="whitenoise" v-model="waveType" 
-								aria-describedby="wave-description">ホワイトノイズ</label>
-						</div>
-						<div class="radio-row" style="margin-top: 1rem;">
-							<label><input type="radio" name="waveType" value="sine1000Hz" v-model="waveType" 
-								aria-describedby="wave-description">1000Hz 正弦波</label>
-							<label><input type="radio" name="waveType" value="sine1500Hz" v-model="waveType" 
-								aria-describedby="wave-description">1500Hz 正弦波</label>
-							<label><input type="radio" name="waveType" value="sineCustom" v-model="waveType" 
-								aria-describedby="wave-description">カスタム正弦波</label>
-						</div>
-						<div v-show="waveType === 'sineCustom'" class="custom-freq-input">
-							<label for="customFreq">周波数:</label>
-							<input id="customFreq" type="number" min="20" max="20000" step="1" v-model="customFreq" 
-								aria-label="カスタム周波数（Hz）">
-							<span>Hz</span>
-							<span style="font-size: 0.8em; color: #666; margin-left: 0.5rem;">(20-20000Hz)</span>
-						</div>
+					<div class="control-group">
+						<fieldset>
+							<legend>音源設定</legend>
+							<div class="radio-row">
+								<label><input type="radio" name="waveType" value="pseudoAudio" v-model="waveType"
+									aria-describedby="wave-description">疑似音声</label>
+								<label><input type="radio" name="waveType" value="whitenoise" v-model="waveType"
+									aria-describedby="wave-description">ホワイトノイズ</label>
+							</div>
+							<div class="radio-row" style="margin-top: 1rem;">
+								<label><input type="radio" name="waveType" value="sine1000Hz" v-model="waveType"
+									aria-describedby="wave-description">1000Hz 正弦波</label>
+								<label><input type="radio" name="waveType" value="sine1500Hz" v-model="waveType"
+									aria-describedby="wave-description">1500Hz 正弦波</label>
+								<label><input type="radio" name="waveType" value="sineCustom" v-model="waveType"
+									aria-describedby="wave-description">カスタム正弦波</label>
+							</div>
+							<div v-show="waveType === 'sineCustom'" class="custom-freq-input">
+								<label for="customFreq">周波数 (Hz):</label>
+								<input id="customFreq" type="number" min="20" max="20000" step="1" v-model="customFreq">
+								<span>Hz</span>
+								<span style="font-size: 0.8em; color: #666; margin-left: 0.5rem;">(20-20000Hz)</span>
+							</div>
+						</fieldset>
 					</div>
 					
-					<p id="wave-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">出力する音声信号の種類を選択</p>
-					<p id="offset-description" style="margin: 0.5em 0; font-size: 0.9em; color: #666; display: none;">F3E, F1E, G1E試験時に必要な10dBのオフセットゲインを適用</p>
+					<p id="wave-description" class="sr-only">出力する音声信号の種類を選択</p>
+					<p id="offset-description" class="sr-only">F3E, F1E, G1E試験時に必要な10dBのオフセットゲインを適用</p>
 				</section>
 				<!-- Live regions for screen readers -->
 				<div id="output-status" aria-live="polite" class="sr-only">
@@ -439,11 +440,10 @@
 				
 				<section aria-labelledby="spectrum-heading">
 					<h2 id="spectrum-heading" class="sr-only">周波数スペクトラム</h2>
-					<div class="canvas" role="img" aria-label="周波数スペクトラム表示">
-					<canvas ref="spectrumGrid" width="1200" height="1024" aria-hidden="true"></canvas>
-					<canvas ref="spectrum" width="1200" height="1024" aria-hidden="true"></canvas>
-					<p class="sr-only">現在の音声信号の周波数成分をグラフで表示しています。横軸は周波数（Hz）、縦軸は音圧レベル（dB）です。</p>
-				</div>
+					<div class="canvas" role="img" aria-label="周波数スペクトラム表示。現在の音声信号の周波数成分をグラフで表示。横軸は周波数（Hz）、縦軸は音圧レベル（dB）。">
+						<canvas ref="spectrumGrid" width="1200" height="1024" aria-hidden="true"></canvas>
+						<canvas ref="spectrum" width="1200" height="1024" aria-hidden="true"></canvas>
+					</div>
 				</section>
 			</main>
 			<details style="margin-top: 2em; font-size: 0.9em;">
