@@ -41,7 +41,21 @@ def design_filters(sr):
     
     window = np.kaiser(fir_length, 8.0)
     fir = h_truncated * window
-    fir = fir / np.sum(fir) # Normalization for DC
+    # Normalization: Minimize total energy error across full band
+    # fir = fir / np.sum(fir) # Old method: Normalization for DC
+    
+    # Calculate current response
+    _, h_fir_full = signal.freqz(fir, [1], worN=2**15)
+    actual_gain = np.abs(h_iir) * np.abs(h_fir_full)
+    
+    # Target energy (inverse of loss)
+    target_gain = 1.0 / loss_m
+    energy_theory = np.sum(target_gain**2)
+    energy_actual = np.sum(actual_gain**2)
+    
+    # Optimal scaling factor k to match energy: E_theory = E_actual * k^2
+    k_opt = np.sqrt(energy_theory / energy_actual)
+    fir = fir * k_opt
     
     return {
         "iir": {"num": num_d.tolist(), "den": den_d.tolist()},

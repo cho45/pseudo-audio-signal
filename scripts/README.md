@@ -13,6 +13,7 @@
 |-----------|------|
 | generate_coeffs.py | フィルタ係数を生成し `coeffs.json` に出力 |
 | verify_coeffs.py | 生成された `coeffs.json` の検証（理論特性との誤差評価） |
+| calculate_power_error.py | 帯域別総パワー誤差の計算・評価 |
 | fir_optimization_analysis.py | FIR係数の最適化分析・可視化 |
 
 ## 実行方法
@@ -37,6 +38,14 @@ uv run --python 3.12 --with numpy --with scipy scripts/verify_coeffs.py --test
 
 - レポートモード: ITU-T G.227 理論特性との誤差を評価し、`scripts/verification_result.png` に出力
 - テストモード: 基準値を超えた場合 exit code 1 を返す（CI向け）
+
+### 帯域別総パワー誤差の評価
+
+```bash
+uv run --python 3.12 --with numpy --with scipy scripts/calculate_power_error.py
+```
+
+理論特性と実装フィルタ（IIR+FIR）の帯域別総パワーを比較し、誤差を出力する。
 
 ### FIR係数の最適化分析
 
