@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "serve": "serve . -l 3004",
     "test": "playwright test",
     "test:ui": "playwright test --ui"
   },
