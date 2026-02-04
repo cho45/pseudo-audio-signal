@@ -56,10 +56,20 @@ def design_filters(sr):
     # Optimal scaling factor k to match energy: E_theory = E_actual * k^2
     k_opt = np.sqrt(energy_theory / energy_actual)
     fir = fir * k_opt
-    
+
+    # Calculate RMS normalization factor
+    # This is the gain needed to make pseudoAudio signal have proper level
+    _, h_iir_norm = signal.freqz(num_d, den_d, worN=32768)
+    _, h_fir_norm = signal.freqz(fir, worN=32768)
+    h_combined = h_iir_norm * h_fir_norm
+    power_sum = np.sum(np.abs(h_combined)**2)
+    rms_output = np.sqrt(power_sum / len(h_combined))
+    normalization_factor = 1.0 / rms_output
+
     return {
         "iir": {"num": num_d.tolist(), "den": den_d.tolist()},
-        "fir": fir.tolist()
+        "fir": fir.tolist(),
+        "normalization_factor": normalization_factor
     }
 
 coeffs = {

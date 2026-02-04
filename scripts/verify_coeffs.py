@@ -63,6 +63,16 @@ def evaluate_performance(sr, iir_num, iir_den, fir_coeffs):
     return result
 
 
+def calculate_normalization_factor(iir_num, iir_den, fir_coeffs):
+    """周波数応答から正規化係数を計算"""
+    _, h_iir = signal.freqz(iir_num, iir_den, worN=32768)
+    _, h_fir = signal.freqz(fir_coeffs, worN=32768)
+    h_combined = h_iir * h_fir
+    power_sum = np.sum(np.abs(h_combined)**2)
+    rms_output = np.sqrt(power_sum / len(h_combined))
+    return 1.0 / rms_output
+
+
 def run_test(coeffs):
     """テストモード: 基準値を超えていないか検証"""
     all_passed = True
@@ -73,6 +83,21 @@ def run_test(coeffs):
         result = evaluate_performance(sr, c['iir']['num'], c['iir']['den'], c['fir'])
 
         print(f"Sampling Rate: {sr} Hz")
+
+        # 正規化係数の検証
+        stored_factor = c['normalization_factor']
+        calculated_factor = calculate_normalization_factor(
+            np.array(c['iir']['num']),
+            np.array(c['iir']['den']),
+            np.array(c['fir'])
+        )
+        factor_diff = abs(stored_factor - calculated_factor)
+        factor_passed = factor_diff < 1e-10
+        factor_status = "PASS" if factor_passed else "FAIL"
+        print(f"  [{factor_status}] Normalization factor: stored={stored_factor:.6f}, calculated={calculated_factor:.6f}, diff={factor_diff:.2e}")
+
+        if not factor_passed:
+            all_passed = False
 
         for band_name, threshold in THRESHOLDS.items():
             rmse = result[band_name]['rmse']
@@ -102,6 +127,18 @@ def run_report(coeffs):
         tel = result['telephone']
 
         print(f"Sampling Rate: {sr} Hz")
+
+        # 正規化係数の検証
+        stored_factor = c['normalization_factor']
+        calculated_factor = calculate_normalization_factor(
+            np.array(c['iir']['num']),
+            np.array(c['iir']['den']),
+            np.array(c['fir'])
+        )
+        print(f"  Normalization factor: {stored_factor:.6f}")
+        print(f"    Calculated: {calculated_factor:.6f}")
+        print(f"    Difference: {abs(stored_factor - calculated_factor):.2e}")
+
         print(f"  Full band (10Hz - {sr//2}Hz):")
         print(f"    Max Error: {full['max_error']:.4f} dB")
         print(f"    RMSE: {full['rmse']:.4f} dB")

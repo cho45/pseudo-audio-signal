@@ -48,7 +48,8 @@ const appOptions = {
 				const targetSr = availableSrs.reduce((prev, curr) =>
 					Math.abs(curr - sr) < Math.abs(prev - sr) ? curr : prev
 				);
-				const { iir: iir1, fir: firCoeffs } = allCoeffs[targetSr];
+				const { iir: iir1, fir: firCoeffs, normalization_factor } = allCoeffs[targetSr];
+				this.normalizationFactor = normalization_factor;
 				
 				console.log(`Using coefficients for ${targetSr}Hz (Actual SR: ${sr}Hz)`);
 
@@ -222,8 +223,8 @@ const appOptions = {
 					this.oscillatorGain.gain.value = Math.sqrt(2);
 					break;
 				case "pseudoAudio":
-					this.pseudoAudioGain.gain.value = 6.666;
-					console.log(this.pseudoAudioGain.gain.value);
+					this.pseudoAudioGain.gain.value = this.normalizationFactor;
+					console.log(`pseudoAudio gain: ${this.normalizationFactor.toFixed(3)}`);
 					break;
 				case "whitenoise":
 					this.whitenoiseGain.gain.value = 1;
